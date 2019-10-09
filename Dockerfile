@@ -1,6 +1,6 @@
-FROM python:3-stretch
+FROM python:3-alpine
 
-LABEL version="0.0.1"
+LABEL version="0.0.2"
 LABEL repository="https://github.com/advancedcsg-open/action-aws-sam"
 LABEL homepage="https://github.com/advancedcsg-open/action-aws-sam"
 LABEL maintainer="Advanced Toolchain"
@@ -10,9 +10,8 @@ LABEL "com.github.actions.icon"="check"
 LABEL "com.github.actions.color"="green"
 
 ENV DOCKERVERSION=18.06.1-ce
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends curl groff jq && \
-  apt-get -y clean && apt-get -y autoclean && apt-get -y autoremove && \
+RUN apk update && \
+  apk add curl groff jq bash build-base curl file git gzip libc6-compat ncurses && \
   curl -fsSLO https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.3.0/heptio-authenticator-aws_0.3.0_linux_amd64 && \
   mv heptio-authenticator-aws_0.3.0_linux_amd64 /usr/local/bin/aws-iam-authenticator && \
   chmod +x /usr/local/bin/aws-iam-authenticator && \
