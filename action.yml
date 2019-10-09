@@ -1,0 +1,9 @@
+name: AWS SAM CLI
+description: Run AWS SAM CLI commands
+branding:
+  icon: check
+  color: green
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+
