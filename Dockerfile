@@ -1,4 +1,4 @@
-FROM alpine:3.10
+FROM python:3-stretch
 
 LABEL version="0.0.1"
 LABEL repository="https://github.com/advancedcsg-open/action-aws-sam"
@@ -9,19 +9,20 @@ LABEL "com.github.actions.description"="Run AWS SAM CLI commands"
 LABEL "com.github.actions.icon"="check"
 LABEL "com.github.actions.color"="green"
 
-RUN curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
-    && unzip awscli-bundle.zip \
-    && sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws \
-    && sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)" \
-    && test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv) \
-    && test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv) \
-    && test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile \
-    && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.profile \
-    && brew --version \
-    && brew tap aws/tap \
-    && brew install aws-sam-cli \
-    && sam --version
+ENV DOCKERVERSION=18.06.1-ce
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends curl groff jq && \
+  apt-get -y clean && apt-get -y autoclean && apt-get -y autoremove && \
+  curl -fsSLO https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.3.0/heptio-authenticator-aws_0.3.0_linux_amd64 && \
+  mv heptio-authenticator-aws_0.3.0_linux_amd64 /usr/local/bin/aws-iam-authenticator && \
+  chmod +x /usr/local/bin/aws-iam-authenticator && \
+  curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKERVERSION}.tgz && \
+  tar xzvf docker-${DOCKERVERSION}.tgz --strip 1 \
+                 -C /usr/local/bin docker/docker && \
+  rm docker-${DOCKERVERSION}.tgz && \
+  rm -rf /var/lib/apt/lists/* && \
+  pip install --upgrade pip && \
+  pip install setuptools awscli aws-sam-cli
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY "entrypoint.sh" "/entrypoint.sh"
 ENTRYPOINT ["/entrypoint.sh"]
